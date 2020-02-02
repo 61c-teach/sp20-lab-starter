@@ -1,7 +1,7 @@
 UNAME_S := $(shell uname -s)
-CC=/*YOUR CODE HERE*/
-LD=/*YOUR CODE HERE*/
-CFLAGS=/*YOUR CODE HERE*/
+CC=gcc
+LD=gcc
+CFLAGS=-ggdb -Wall -std=c99
 LDFLAGS=
 
 ifeq ($(UNAME_S), Darwin)
@@ -12,21 +12,27 @@ ifeq ($(UNAME_S), Linux)
     MEMCHECK=valgrind --tool=memcheck --leak-check=full --track-origins=yes
 endif
 
+BIT_OPS_OBJS = bit_ops.o test_bit_ops.o
+BIT_OPS_PROG = bit_ops
+
 LFSR_OBJS = lfsr.o test_lfsr.o
 LFSR_PROG = lfsr
 
-BINARIES=vector-test bit_ops lfsr_prog
+VECTOR_OBJS=vector.o vector-test.o
+VECTOR_PROG=vector-test
+
+BINARIES=$(VECTOR_PROG) $(BIT_OPS_PROG) $(LFSR_PROG) 
 
 all: $(BINARIES)
 
-bit_ops: bit_ops.o test_bit_ops.o
-	$(CC) $(CFLAGS) -g -o bit_ops bit_ops.o test_bit_ops.o
+$(BIT_OPS_PROG): $(BIT_OPS_OBJS)
+	$(CC) $(CFLAGS) -g -o $(BIT_OPS_PROG) $(BIT_OPS_OBJS) $(LDFLAGS)
 
-lfsr: $(LFSR_OBJS)
-	$(CC) $(CFLAGS) -g -o /*YOUR CODE HERE*/
+$(LFSR_PROG): $(LFSR_OBJS)
+	$(CC) $(CFLAGS) -g -o $(LFSR_PROG) $(LFSR_OBJS) $(LDFLAGS)
 
-vector-test: /*YOUR CODE HERE*/
-	/*YOUR CODE HERE*/
+$(VECTOR_PROG): $(VECTOR_OBJS)
+	$(LD) -g -o $(VECTOR_PROG) $(VECTOR_OBJS) $(LDFLAGS)
 
 lfsr.c: lfsr.h
 test_lfsr.c: lfsr.h
@@ -37,8 +43,8 @@ test_bit_ops.c: bit_ops.h
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 
-vector-memcheck: vector-test
-	$(MEMCHECK) ./vector-test
+vector-memcheck: $(VECTOR_PROG)
+	$(MEMCHECK) ./$(VECTOR_PROG)
 
 clean: 
 	-rm -rf core *.o *~ "#"*"#" Makefile.bak $(BINARIES) *.dSYM
