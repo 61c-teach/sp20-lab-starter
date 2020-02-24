@@ -3,7 +3,7 @@
 .text
 main:
     jal ra, create_default_list
-    add s0, a0, x0  # $v0 = $s0 is head of node list
+    add s0, a0, x0  # a0 = s0 is head of node list
 
     #print the list
     add a0, s0, x0
@@ -13,9 +13,9 @@ main:
     jal ra, print_newline
 
     # load your args
-    add a0, s0, x0  # load the address of the first node into $a0
+    add a0, s0, x0  # load the address of the first node into a0
 
-    # load the address of the function in question into $a1 (check out la)
+    # load the address of the function in question into a1 (check out la on the green sheet)
     ### YOUR CODE HERE ###
 
     # issue the call to map
