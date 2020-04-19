@@ -24,7 +24,7 @@ const char *template_str = "<!DOCTYPE html> \
 
 /** Serves the file at path to the the socket fd. */
 void handle_report_request(int socket_fd, int arr_size) {
-   char *result = compute_dot(arr_size);
+   char *result = compute_dotp(arr_size);
    int size = strlen(result);
    http_make_header(socket_fd, "text/html", 200, size);
    http_send_data(socket_fd, result, size);

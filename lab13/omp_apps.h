@@ -10,14 +10,10 @@
 
 #include "libbmp/libbmp.h"
 
-// #define ARRAY_SIZE 100000
-// extern int ARRAY_SIZE;
-// #define ARRAY_SIZE 100000000
-// #define REPEAT     100
-#define REPEAT 10
+#define REPEAT 100
 #define BUF_SIZE 8192
 
-char* compute_dot(int);
+char *compute_dotp(int);
 char *image_proc(const char*);
 
 #endif

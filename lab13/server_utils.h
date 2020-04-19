@@ -37,13 +37,13 @@ extern int dotp_size;
 
 int start_with(char*, char*);
 
-void http_make_header(int sfd,  char *ftype, int status_code, __off_t size);
+void http_make_header(int,  char *, int, __off_t);
 
-void http_make_error(int socket_fd, int status);
+void http_make_error(int , int );
 
-void signal_callback_handler(int signum);
+void signal_callback_handler(int );
 
-void exit_with_usage(char *executable_name);
+void exit_with_usage(char*);
 
 void handle_report_request(int, int);
 

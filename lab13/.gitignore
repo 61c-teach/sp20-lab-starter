@@ -4,6 +4,9 @@
 # executables
 server_basic
 server_process
+v_add
+hello
+dotp
 **/report.txt
 **/*_sobel.bmp
 

@@ -45,8 +45,7 @@ double dotp_reduction_optimized(double* x, double* y, int arr_size) {
   return global_sum;
 }
 
-/** report_buf should be large enough to hold report text */
-char* compute_dot(int arr_size) {
+char* compute_dotp(int arr_size) {
   // Generate input vectors
   char* report_buf = (char*)malloc(BUF_SIZE), *pos = report_buf;
   double start_time, run_time;
