@@ -257,7 +257,7 @@ void serve_forever(int *socket_number) {
 
          dispatch(client_socket_number);
 
-         // This is to kill the child process if parent dies.
+         // This is to kill the child process if parent proc dies.
          // ONLY works on LINUX
          // COMMENT IT OUT if you are NOT on LINUX
          if (r == -1 || getppid() != parent_pid) {
