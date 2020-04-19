@@ -38,11 +38,22 @@ Outline:
     
 * Compare performance? 
 
-### NOTE: PLEASE RUN YOUR CODE ON THE HIVE MACHINES AND NOT YOUR LOCAL MACHINE.
 
-## Exercise 1 - OpenMP Hello World
+## Part1: OpenMP Intro
+OpenMP stands for Open specification for Multi-Processing. It is a framework that offers a C 
+interface. It is not a built-in part of the language -- most OpenMP features are directives 
+to the compiler. 
 
-For this lab, we will use C to leverage our prior programming experience with it. OpenMP is a framework with a C interface, and it is not a built-in part of the language. Most OpenMP features are actually directives to the compiler. Consider the following implementation of Hello World (`hello.c`):
+Benefits of multi-threaded programming using OpenMP include:
+ - Very simple interface allows a programmer to separate a program into serial regions and parallel regions.
+ – Convenient synchronization control(Data race bugs in POSIX threads are very hard to trace)
+ 
+In this lab, we will practice on basic usage of OpenMP. 
+**Feel free to build and use OpenMP on your own machine, but it would be the easiest to work on hive machines 
+as they have OpenMP built and ready for use.**
+
+### Exercise 1 - OpenMP Hello World
+Consider the following implementation of Hello World (`hello.c`):
 
 ```
 int main() {
@@ -81,7 +92,7 @@ You can run this (`make v_add` followed by `./v_add`) and the testing framework 
 
 ![Splitting Up The Work](decomp.jpg)
 
-Your task is to modify `v_add.c` so there is some speedup (speedup may plateau as the number of threads continues to increase). To aid you in this process, two useful OpenMP functions are:
+Your task is to optimize `v_add.c` (speedup may plateau as the number of threads continues to increase). To aid you in this process, two useful OpenMP functions are:
 
 * `int omp_get_num_threads();`
 * `int omp_get_thread_num();`
@@ -165,6 +176,19 @@ Finally, run your code to examine the performance:
 make dotp
 ./dotp
 ```
+
+## Background - Http Web Server Intro
+
+ web server includes several parts that control how web users access hosted files, at minimum an HTTP server. An HTTP server is a piece of software that understands URLs (web addresses) and HTTP (the protocol your browser uses to view webpages). It can be accessed through the domain names (like mozilla.org) of websites it stores, and delivers their content to the end-user's device.
+A basic HTTP web server should implement the following:
+         1. Create a listening socket and bind it to a port
+         2. Wait a client to connect to the port
+         3. Accept the client and obtain a new connection socket
+         4. Read in and parse the HTTP request
+         5. Do one of two things: (determined by command line arguments)
+         • Serve a file from the local file system, or yield a 404 Not Found
+         • Proxy the request to another HTTP server.
+
 
 ### Checkpoint
 
