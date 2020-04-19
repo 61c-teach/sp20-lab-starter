@@ -39,7 +39,7 @@ Outline:
 * Compare performance? 
 
 
-## Part1: OpenMP Intro
+## Part1: Multithreading programming using OpenMP
 OpenMP stands for Open specification for Multi-Processing. It is a framework that offers a C 
 interface. It is not a built-in part of the language -- most OpenMP features are directives 
 to the compiler. 
@@ -118,11 +118,7 @@ void v_add(double* x, double* y, double* z) {
 }
 ```
 
-Test your code with:
-
-```
-make v_add && ./v_add
-```
+Test the performance of your code with `make v_add && ./v_add`
 
 ### Checkpoint
 
@@ -132,67 +128,76 @@ make v_add && ./v_add
 
 ## Exercise 3 - Dot Product
 
-The next task is to compute the dot product of two vectors. At first glance, implementing this might seem not too different from `v_add`, but the challenge is how to sum up all of the products into the same variable (reduction). A sloppy handling of reduction may lead to **data races**: all the threads are trying to read and write to the same address simultaneously. One solution is to use a **critical section**. The code in a critical section can only be executed by a single thread at any given time. Thus, having a critical section naturally prevents multiple threads from reading and writing to the same data, a problem that would otherwise lead to data races. A naive implementation would protect the sum with a critical section, like (`dotp.c`):
+The next task is to compute the dot product of two vectors. At first glance, implementing this might seem not too different from `v_add`, but the challenge is how to sum up all of the products into the same variable (reduction). A sloppy handling of reduction may lead to **data races**: all the threads are trying to read and write to the same address simultaneously. One solution is to use a **critical section**. The code in a critical section can only be executed by a single thread at any given time. Thus, having a critical section naturally prevents multiple threads from reading and writing to the same data, a problem that would otherwise lead to data races. One way to avoid data races is to use the `critical` primitive provided by OpenMP. An implementation, `dotp_naive` in `omp_apps.c`, protects the sum with a critical section. 
 
-```
-double dotp(double* x, double* y) {
-	double global_sum = 0.0;
-	#pragma omp parallel
-	{
-		#pragma omp for
-		for(int i=0; i<ARRAY_SIZE; i++)
-		    #pragma omp critical
-		    global_sum += x[i] * y[i];
-	}
-	return global_sum;
-}
-```
-
-We offered a little twist to test your implementation for this exercise. 
-Try out the code (`make dotp` and `./dotp`). Notice how the performance gets much worse as the number of threads goes up? By putting all of the work of reduction in a critical section, we have flattened the parallelism and made it so only one thread can do useful work at a time (not exactly the idea behind thread-level parallelism). This contention is problematic; each thread is constantly fighting for the critical section and only one is making any progress at any given time. As the number of threads goes up, so does the contention, and the performance pays the price. Can we reduce the number of times that each thread needs to use a critical section? 
+Try out the code (`make dotp &&./dotp`). Notice how the performance gets much worse as the number of threads goes up? By putting all of the work of reduction in a critical section, we have flattened the parallelism and made it so only one thread can do useful work at a time (not exactly the idea behind thread-level parallelism). This contention is problematic; each thread is constantly fighting for the critical section and only one is making any progress at any given time. As the number of threads goes up, so does the contention, and the performance pays the price. Can we reduce the number of times that each thread needs to use a critical section? 
 
 Task: fix this performance problem use OpenMP's built-in Reduction keyword.
-**Hint**: If you used the `reduction` keyword correctly, your code should no longer contain `#pragma omp critical`.
+(Note that your code should no longer contain `#pragma omp critical`. )
 
-Finally, run your code to examine the performance:
+Run your code to examine the performance. 
 
+
+## Part 2: Multiprocessing basics
+
+### Background - Http Web Server and Multiprocessing
+
+OpenMP is a convenient way to do multithreading computation. Another common task level parallelism approach is multiprocessing. 
+A thread is a single execution sequence that can be managed independently by the operating system. A process is an instance of a computer program that is being executed. It consists of an address space and one or more threads of control. It is the main abstraction for protection provided by the operating system kernel. 
+
+The key differences between multithreading and multiprocessing is that in multithreading threads share the same address space, whereras in multiprocessing each process has its own address space. 
+Performance wise, this difference leads to two observations: 
+1. Threads have lower overhead(low memory and other resource footprint), and the cost of communication between threads is low as in threads can simply read/write to memory addresses in a same address space. 
+2. Sharing memory means we have to be careful about concurrency issuses: when multiple threads can read/write to the same memory address, it can be hard to reason about correctness. 
+
+In the second part of this lab, we will have a very basic but fun practice on writing multi-processing programs. 
+
+The fork syscall is used to create a new process by duplicating the calling process. The new process, referred to as the child, is an exact duplicate of the calling process(read more in the [man page](http://man7.org/linux/man-pages/man2/fork.2.html). Both the newly created process and the
+parent process return from the call to fork. On success, the PID of the child process is returned in the parent, and 0 is returned in the child.  
+
+For example, the following code:
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+int main () {
+  pid_t child_pid;
+  printf("Main process id = %d (parent PID = %d)\n",
+(int) getpid(), (int)  getppid());
+  child_pid = fork();
+  if (child_pid != 0)
+printf("Parent: child's process id = %d\n", child_pid);
+  else
+printf("Child:  my process id = %d\n", (int) getpid()); 
+  return 0;
+}
 ```
-make dotp && ./dotp
+may output:
+```
+Main process id = 9075 (parent PID = 32146)
+Parent: child's process id = 9076
+Child:  my process id = 9076
 ```
 
-## Background - Http Web Server Intro
+The program that we want you to parallelize is a basic HTTP web server. A web server create a listening socket and bind it to a port, then wait a client to connect to the port. Once a connection reqeust reaches, the server obtains a new connection socket, read in and parse the HTTP request, then respond to the request by serving the requested file. 
 
- web server includes several parts that control how web users access hosted files, at minimum an HTTP server. An HTTP server is a piece of software that understands URLs (web addresses) and HTTP (the protocol your browser uses to view webpages). It can be accessed through the domain names (like mozilla.org) of websites it stores, and delivers their content to the end-user's device.
-A basic HTTP web server should implement the following:
-         1. Create a listening socket and bind it to a port
-         2. Wait a client to connect to the port
-         3. Accept the client and obtain a new connection socket
-         4. Read in and parse the HTTP request
-         5. Do one of two things: (determined by command line arguments)
-         • Serve a file from the local file system, or yield a 404 Not Found
-         • Proxy the request to another HTTP server.
+A serial version is implemented for you. Your task is to 
 
 
-### Checkpoint
 
-* Show the TA or AI checking you off your manual fix to `dotp.c` that gets speedup over the single threaded case.
-* Show the TA or AI checking you off your Reduction keyword fix for `dotp.c`, and explain the difference in performance, if there is any.
-* Run your code to show the speedup.
+
 
 ## Checkoff
 
-Exercise 1:
+### Part1
 
-* Nothing to show
+#### Exercise 2:
 
-Exercise 2:
-
-* Show the TA or AI checking you off your code for both optimized versions of `v_add` that manually splits up the work. Remember, you should not have used `#pragma omp for` here.
+* Show your code for both optimized versions of `v_add` that manually splits up the work. Remember, you should not have used `#pragma omp for` here.
 * Run your code to show that it gets parallel speedup.
 * Which version of your code runs faster, chunks or adjacent? What do you think the reason for this is? Explain to the person checking you off.
 
-Exercise 3:
+#### Exercise 3:
 
-* Show the TA or AI checking you off your manual fix to `dotp.c` that gets speedup over the single threaded case.
-* Show the TA or AI checking you off your Reduction keyword fix for `dotp.c`, and explain the difference in performance, if there is any.
-* Run your code to show the speedup.
+* Show your manual fix to `dotp.c` that gets speedup over the single threaded case.
+* Show your fix for `dotp.c`, and explain the difference in performance.
