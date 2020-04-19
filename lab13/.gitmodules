@@ -1,0 +1,6 @@
+[submodule "ImageProcessing"]
+	path = ImageProcessing
+	url = git@github.com:iocentos/ImageProcessing.git
+[submodule "libbmp"]
+	path = libbmp
+	url = git@github.com:marc-q/libbmp.git
