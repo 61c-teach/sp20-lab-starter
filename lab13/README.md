@@ -88,9 +88,8 @@ void v_add(double* x, double* y, double* z) {
 }
 ```
 
-You can run this (`make v_add` followed by `./v_add`) and the testing framework will automatically time it and vary the number of threads. You will see that this actually seems to do worse as we increase the number of threads. The issue is that each thread is executing all of the code within the `omp parallel` block, meaning if we have 8 threads, we will actually be adding the vectors 8 times. **DON'T DO THIS!** To get speedup when increasing the number of threads, we need each thread to do less work, not the same amount as before. Rather than have each thread run the entire for loop, we need to split up the for loop across all the threads so each thread does only a portion of the work:
-
-![Splitting Up The Work](decomp.jpg)
+You can run this (`make v_add` followed by `./v_add`) and the testing framework will automatically time it and vary the number of threads. You will see that this actually seems to do worse as we increase the number of threads. The issue is that each thread is executing all of the code within the `omp parallel` block, meaning if we have 8 threads, we will actually be adding the vectors 8 times. 
+Rather than have each thread run the entire for loop, we need to split up the for loop across all the threads so each thread does only a portion of the work. 
 
 Your task is to optimize `v_add.c` (speedup may plateau as the number of threads continues to increase). To aid you in this process, two useful OpenMP functions are:
 
@@ -105,36 +104,31 @@ Divide up the work for each thread through two different methods (write differen
 2. Second task, **chunking**: if there are N threads, break the vectors into N contiguous chunks, and have each thread only add that chunk (like the figure above).
 
 Hints:
-
 * Use the two functions we listed above somehow in the for loop to choose which elements each thread handles.
 * You may need a special case to prevent going out of bounds for `v_add_optimized_chunks`. Don't be afraid to write one.
 * As you're working on this exercise, you should be thinking about false sharing--read more [here](https://software.intel.com/en-us/articles/avoiding-and-identifying-false-sharing-among-threads) and [here](https://en.wikipedia.org/wiki/False_sharing).
 
-Fact: For this exercise, we are asking you to manually split the work amongst threads. Since this is such a common pattern for software, the designers of OpenMP actually made the `#pragma omp for` directive to automatically split up independent work. Here is the function rewritten using it. **You may NOT use this directive in your solution to this exercise**.
+For this exercise, we are asking you to manually split the work amongst threads since this is a common pattern used in software optimization. The designers of OpenMP actually made the `#pragma omp for` directive to automatically split up independent work. Here is the function rewritten using it. **You may NOT use this directive in your solution to this exercise**.
 
 ```
 void v_add(double* x, double* y, double* z) {
-	#pragma omp parallel
-	{
-		#pragma omp for
-		for(int i=0; i<ARRAY_SIZE; i++)
-			z[i] = x[i] + y[i];
-	}
+	#pragma omp parallel for 
+	for(int i=0; i<ARRAY_SIZE; i++)
+		z[i] = x[i] + y[i];
 }
 ```
 
 Test your code with:
 
 ```
-make v_add
-./v_add
+make v_add && ./v_add
 ```
 
 ### Checkpoint
 
 * Show the TA or AI checking you off your code for both optimized versions of `v_add` that manually splits up the work. Remember, you should not have used `#pragma omp for` here.
 * Run your code to show that it gets parallel speedup.
-* Which version of your code runs faster, chunks or adjacent? What do you think the reason for this is? Explain to the person checking you off.
+* Which version of your code runs faster, chunks or adjacent? Explain the reason for the performance difference.
 
 ## Exercise 3 - Dot Product
 
@@ -153,28 +147,15 @@ double dotp(double* x, double* y) {
 	return global_sum;
 }
 ```
+Try out the code (`make dotp` and `./dotp`). Notice how the performance gets much worse as the number of threads goes up? By putting all of the work of reduction in a critical section, we have flattened the parallelism and made it so only one thread can do useful work at a time (not exactly the idea behind thread-level parallelism). This contention is problematic; each thread is constantly fighting for the critical section and only one is making any progress at any given time. As the number of threads goes up, so does the contention, and the performance pays the price. Can we reduce the number of times that each thread needs to use a critical section? 
 
-Try out the code (`make dotp` and `./dotp`). Notice how the performance gets much worse as the number of threads goes up? By putting all of the work of reduction in a critical section, we have flattened the parallelism and made it so only one thread can do useful work at a time (not exactly the idea behind thread-level parallelism). This contention is problematic; each thread is constantly fighting for the critical section and only one is making any progress at any given time. As the number of threads goes up, so does the contention, and the performance pays the price. Can you fix this performance bottleneck?
-
-**Hint**: REDUCE the number of times that each thread needs to use a critical section!
-
-1. First task: try fixing this code **without using the OpenMP Reduction keyword**. Hint: Try reducing the number of times a thread must add to the shared `global_sum` variable.
-2. Second task: fix the problem **using OpenMP's built-in Reduction keyword** (Google for more information on it). Is your performance any better than in the case of the manual fix? Why or why not?
-
-Note: The exact syntax for using these directives can be kind of confusing. Here are the key things to remember:
-
-* A `#pragma omp parallel` section should be specified with curly braces around the block of code to be parallelized. The opening curly brace **cannot** not be on the same line as this directive. 
-* A `#pragma omp for` section should not be accompanied with extra curly braces. Just stick that directive directly above a `for` loop.
-
-**Hint**: You'll need to type the '`+`' operator somewhere when using `reduction`.
-
+Task: fix this performance problem use OpenMP's built-in Reduction keyword.
 **Hint**: If you used the `reduction` keyword correctly, your code should no longer contain `#pragma omp critical`.
 
 Finally, run your code to examine the performance:
 
 ```
-make dotp
-./dotp
+make dotp && ./dotp
 ```
 
 ## Background - Http Web Server Intro

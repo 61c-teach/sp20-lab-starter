@@ -1,4 +1,5 @@
 #include "server_utils.h"
+#include <unistd.h>
 
 char *header_tag_left = "<center><h1>";
 char *header_tag_right = "</h1><hr></center>";
@@ -189,20 +190,11 @@ void dispatch(int client_socket_number) {
 
    // only support GET request
    void (*request_handler)(int, struct http_request*) = &handle_files_request;
-#ifdef PROC
-   // TODO: STUDENT TASK
-   int pid = fork();
-   if (pid == 0) {
-      request_handler(client_socket_number, request);
-      close(client_socket_number);
-      return;
-   }
-#else
-   // TODO: STUDENT TASK
+
    request_handler(client_socket_number, request);
    close(client_socket_number);
-   return;
-#endif
+
+   sleep(5);      // Pretending we are doing some heavy computation...
 }
 
 /** Open a TCP socket on all interfaces. *socket_number stores
@@ -246,8 +238,8 @@ void serve_forever(int *socket_number) {
 
    while (1) {
       client_socket_number = accept(*socket_number,
-              (struct sockaddr *)&client_address,
-                      (socklen_t *)&client_address_length);
+                                    (struct sockaddr *) &client_address,
+                                    (socklen_t * ) & client_address_length);
       if (client_socket_number < 0) {
          perror("Error accepting socket");
          continue;
@@ -256,6 +248,13 @@ void serve_forever(int *socket_number) {
       printf("Accepted connection from %s on port %d\n",
              inet_ntoa(client_address.sin_addr), client_address.sin_port);
 
+#ifdef PROC
+      // TODO: STUDENT TASK
+      int pid = fork();
+      if (pid == 0)
+         dispatch(client_socket_number);
+#else
       dispatch(client_socket_number);
+#endif
    }
 }
