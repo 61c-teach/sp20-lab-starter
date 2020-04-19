@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-fopenmp -g -std=gnu99 -ggdb3 -c -Wall
+CFLAGS= -std=gnu99 -c
 LDFLAGS=-fopenmp
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLES=v_add dotp hello server_basic server_process
@@ -22,24 +22,24 @@ server_process.o: server.c libhttp/libhttp.c omp_apps.c server_utils.c libbmp/li
 omp_app.o: omp_apps.c libbmp/libbmp.c
 
 server_utils_seriel.o: server_utils.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 server_utils_process.o: server_utils.c
-	$(CC) -DPROC $(CFLAGS) -c $< -o $@
+	$(CC) -DPROC $(CFLAGS) $< -o $@
 server_process.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 server_basic.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
 libbmp.o:
-	$(CC) $(CFLAGS) -c libbmp/libbmp.c -o $@
+	$(CC) $(CFLAGS) libbmp/libbmp.c -o $@
 libhttp.o:
-	$(CC) $(CFLAGS) -c libhttp/libhttp.c -o $@
+	$(CC) $(CFLAGS) libhttp/libhttp.c -o $@
 
 omp_app.o: omp_apps.c libbmp.o
-	$(CC) $(CFLAGS) -c omp_apps.c -o $@
+	$(CC) $(CFLAGS) omp_apps.c -o $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	rm -f $(EXECUTABLES) *.o

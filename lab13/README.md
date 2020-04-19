@@ -179,11 +179,15 @@ Parent: child's process id = 9076
 Child:  my process id = 9076
 ```
 
-The program that we want you to parallelize is a basic HTTP web server. A web server create a listening socket and bind it to a port, then wait a client to connect to the port. Once a connection reqeust reaches, the server obtains a new connection socket, read in and parse the HTTP request, then respond to the request by serving the requested file. 
+The program that we want you to parallelize is a basic HTTP web server. A web server create a listening socket and bind it to a port, then wait a client to connect to the port. Once a connection reqeust reaches, the server obtains a new connection socket, read in and parse the HTTP request, then respond to the request by serving the requested file. For simplicity, the server program that we will be working with only reponds to "GET" requests. 
 
-A serial version is implemented for you. Your task is to 
+A serial version is already implemented for you. You can largely ignore the 
+The server we provide has a few twists:
+*  
+Your task is to 
 
 
+// TODO:  
 
 
 

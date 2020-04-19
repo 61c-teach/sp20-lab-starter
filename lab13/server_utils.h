@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/prctl.h>
 
 #include "omp_apps.h"
 #include "libhttp/libhttp.h"
