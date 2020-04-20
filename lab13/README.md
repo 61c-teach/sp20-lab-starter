@@ -151,8 +151,8 @@ Child:  my process id = 9076
 The program that we want you to parallelize is a basic HTTP web server. A web server create a listening socket and bind it to a port, then wait a client to connect to the port. Once a connection reqeust reaches, the server obtains a new connection socket, read in and parse the HTTP request, then respond to the request by serving the requested file. For simplicity, the server program that we will be working with only reponds to "GET" requests. 
 
 A serial version is already implemented for you. To start, run `make server_basic && ./server_basic` in command line. 
-It will run locally using `lab13/files/` as the serve file directory, and listen to port 8000 by default(can be changed from command line argument, for example, `./server_basic --port 8080`). There are two ways to make a request: either open a browser and navigate to `localhost:8000/[request filename]` or use the curl program: run `curl localhost:8000/[request filename]` from the command line. 
-If the reqeusted file is a dir, the server first looks for the presence of an index.html file. If that is found, the webpage will be served. Otherwise it will present links to each file under the requested directory. 
+This server program will run locally using `lab13/files/` as the serve file directory, and listen to port 8000 by default(can be changed from command line argument, for example, `./server_basic --port 8080`). There are two ways to make a request: either open a browser and navigate to `localhost:8000/[request filename]` or use the curl program: run `curl localhost:8000/[request filename]` from the command line. 
+If the requested filename refers to a directory, the server first looks for the presence of an **index.html** file. If that is found, that webpage will be served. Otherwise it will present links to each file under the requested directory. 
 
 This server also offers two twists:
 * If the request is `localhost:8000/report`, it will run the `dotp` program and serve the result in text. The `arr_size` parameter has a default value set in `omp_apps.c`, but you can change it from command line: `./server_basic --dotp-size 10000000`. 
@@ -160,9 +160,15 @@ This server also offers two twists:
 For example, navigating to `localhost:8000/girl.bmp` should get the original picture, but if you navigate to `localhost:8000/filter/girl.bmp`, your browser should render the following:
 ![sample](assets/sample_output.jpg)
 
-Optional: 
-* The sobel edge detector filter is implemented for you. Can you optimize it using OpenMP? 
+Note: If you do this exercise on a hive machine using ssh and want to make client request using your local browser(sadly we can't just go to Soda Hall these days...), you would need to forward traffic through a port of your local machine to the ssh server and have ssh server forward the traffic to the destination server.
+To do that, you'd need to connect to a hive machine using -L option. For example:
+`ssh -L 4000:127.0.0.1:8000 [login]@hive9.cs.berkeley.edu`
+Now, SSH will bind to port 4000 on your computer. Any traffic that comes to this port is sent to the SSH server, and the ssh server will send the traffic
+to port 8000 of 127.0.0.1 of the hive machine. Request `localhost:4000` in your browser would allow you to get the same affect as navigating to `localhost:8000` in the browser on a hive machine. 
+And, of course, you can use `curl` instead. (`man curl` for more usage of `curl`). 
 
+Optional: 
+* The sobel edge detector is implemented for you. Can you optimize it using OpenMP? 
 (Feel free to implement other image processing algorithms and play with the server anyway you like. :) 
 
 For our purpose here, the details of the server implementation can largely be ignored, but the function `server_forever` defined in `server_utils.c` needs your optimization. In this current implementation, the server program operates on a single process. Once the main process gets a request, it will work on serving the request before coming back greeting the next request. Therefore, if serving one request takes more than a blink -- best luck on clients who need to be served later. </br>
@@ -171,10 +177,9 @@ Can we improve the server by some parallelism?
 
 ### Exercise:
 Instead of serving a request by the main process running the server program, always fork a new child process to do that and let the parent process continue to greet new requests. 
+To test your optimization, run `make server_process && ./server_process`, then make two consecutive requests to any file, verify that the second request is immediately served. 
 
-To test your optimization, run `make server_process && ./server_process`, then make two consecutive reqeusts to any file, verify that the second request is immediately served. 
-
-(FYI: forking a process to respond to a request is probably not the best  plan for parallelism. The more popular solution is to use a thread pool, which will be out of scope materials for CS61C. )
+(FYI: forking a process to respond to a request is probably not the best parallelism approach -- the modern solution is to use a thread pool where the overhead is much lower and you have convenient control over server load.)
 
 ## Checkoff
 
@@ -186,11 +191,9 @@ To test your optimization, run `make server_process && ./server_process`, then m
 * Which version of your code runs faster, chunks or adjacent? What do you think the reason for this is? Explain to the person checking you off.
 
 #### Exercise 3:
-
 * Show your manual fix to `dotp.c` that gets speedup over the single threaded case.
 * Show your fix for `dotp.c`, and explain the difference in performance.
 
 ### Part2
-
-Start your server: `./server_process`, make two consecutive reqeusts to any file, verify that the second request is immediately served. 
+Start your server: `./server_process`, make two consecutive requests to any file, verify that the second request is immediately served. 
 
