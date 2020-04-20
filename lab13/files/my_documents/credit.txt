@@ -1,1 +1,2 @@
-Site designed by cs162 staff
+Site designed by cs162 staff.
+Content in this folder introduced by alice.
