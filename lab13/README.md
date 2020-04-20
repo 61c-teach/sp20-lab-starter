@@ -107,18 +107,19 @@ Run your code to examine the performance.
 
 ## Part 2: Intro to multi-processing programming 
 
-OpenMP is a convenient way to do multithreading computation. Another common task level parallelism approach is multiprocessing. 
+OpenMP is a convenient way to do multi-threading computation. Another common task level parallelism approach is multiprocessing. 
 A thread is a single execution sequence that can be managed independently by the operating system. A process is an instance of a computer program that is being executed. It consists of an address space and one or more threads of control. It is the main abstraction for protection provided by the operating system kernel. 
 
 The key differences between multi-threading and multiprocessing is that in multi-threading, threads share the same address space, whereas in multiprocessing, each process has its own address space. 
 Performance wise, this difference leads to two observations: 
 1. Threads have lower overhead(low memory and other resource footprint), and the cost of communication between threads is low as in threads can simply read/write to memory addresses in a same address space. 
-2. Sharing memory means we have to be careful about concurrency issuses: when multiple threads can read/write to the same memory address, it can be hard to reason about correctness. 
+2. Sharing memory means we have to be careful about concurrency issues: when multiple threads can read/write to the same memory address, it can be hard to reason about correctness. 
 ![](./assets/process.png)
 </br>
 ![](./assets/threads.png)
 </br>
 (credit to [Julia Evans](https://drawings.jvns.ca/))
+
 ### Background - Http Web Server and Multi-processing
 
 

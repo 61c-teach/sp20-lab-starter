@@ -177,8 +177,7 @@ void dispatch(int client_socket_number) {
    }
 
    printf("%s\n", request->path);
-   if (strcmp(request->method, "REPORT") == 0 ||
-         strcmp(request->path, "/report") == 0) {
+   if (strcmp(request->path, "/report") == 0) {
       handle_report_request(client_socket_number, dotp_size);
       return;
    }
