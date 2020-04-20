@@ -17,8 +17,8 @@ server_process: server_process.o libhttp.o omp_apps.o server_utils_process.o lib
 $(EXECUTABLES):
 	$(CC) $(LDFLAGS) $^ -o $@
 
-server_basic.o: server.c libhttp/libhttp.c omp_apps.c server_utils.c libbmp/libbmp.c
-server_process.o: server.c libhttp/libhttp.c omp_apps.c server_utils.c libbmp/libbmp.c
+server_basic: server.c libhttp/libhttp.c omp_apps.c server_utils.c libbmp/libbmp.c
+server_process: server.c libhttp/libhttp.c omp_apps.c server_utils.c libbmp/libbmp.c
 omp_app.o: omp_apps.c libbmp/libbmp.c
 
 server_utils_seriel.o: server_utils.c
