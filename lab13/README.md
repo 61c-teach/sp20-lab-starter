@@ -108,15 +108,19 @@ Run your code to examine the performance.
 ## Part 2: Intro to multi-processing programming 
 
 OpenMP is a convenient way to do multithreading computation. Another common task level parallelism approach is multiprocessing. 
-
-### Background - Http Web Server and Multi-processing
-
 A thread is a single execution sequence that can be managed independently by the operating system. A process is an instance of a computer program that is being executed. It consists of an address space and one or more threads of control. It is the main abstraction for protection provided by the operating system kernel. 
 
 The key differences between multi-threading and multiprocessing is that in multi-threading, threads share the same address space, whereas in multiprocessing, each process has its own address space. 
 Performance wise, this difference leads to two observations: 
 1. Threads have lower overhead(low memory and other resource footprint), and the cost of communication between threads is low as in threads can simply read/write to memory addresses in a same address space. 
 2. Sharing memory means we have to be careful about concurrency issuses: when multiple threads can read/write to the same memory address, it can be hard to reason about correctness. 
+![](./assets/process.png)
+</br>
+![](./assets/threads.png)
+</br>
+(credit to [Julia Evans](https://drawings.jvns.ca/))
+### Background - Http Web Server and Multi-processing
+
 
 In the second part of this lab, we will have a very basic but fun practice on writing multi-processing programs. 
 
@@ -168,7 +172,7 @@ to port 8000 of 127.0.0.1 of the hive machine. Request `localhost:4000` in your 
 And, of course, you can use `curl` instead. (`man curl` for more usage of `curl`). 
 
 Optional: 
-* The sobel edge detector is implemented for you. Can you optimize it using OpenMP? 
+* The sobel edge detector is implemented for you. Can you optimize it using OpenMP? </br>
 (Feel free to implement other image processing algorithms and play with the server anyway you like. :) 
 
 For our purpose here, the details of the server implementation can largely be ignored, but the function `server_forever` defined in `server_utils.c` needs your optimization. In this current implementation, the server program operates on a single process. Once the main process gets a request, it will work on serving the request before coming back greeting the next request. Therefore, if serving one request takes more than a blink -- best luck on clients who need to be served later. </br>
@@ -178,6 +182,11 @@ Can we improve the server by some parallelism?
 ### Exercise:
 Instead of serving a request by the main process running the server program, always fork a new child process to do that and let the parent process continue to greet new requests. 
 To test your optimization, run `make server_process && ./server_process`, then make two consecutive requests to any file, verify that the second request is immediately served. 
+
+Note: Forked child processes are not guaranteed to be killed when you kill the parent process from command line by hitting Ctrl+C. 
+This may lead to a side effect that the default port 8000 is occupied and you won't be able to restart your server program listening to the same port. 
+The way to do it properly is out of scope materials for the purpose of 61c(you will learn to resolve issues like such in cs162, but you're encouraged to figure it out anyway).
+We provide a work around here: If a port you attempt to use is occupied by a zombie process, you can kill it using command `fuser -k [port#]/tcp`. 
 
 (FYI: forking a process to respond to a request is probably not the best parallelism approach -- the modern solution is to use a thread pool where the overhead is much lower and you have convenient control over server load.)
 

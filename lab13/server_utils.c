@@ -250,21 +250,9 @@ void serve_forever(int *socket_number) {
 
       pid_t parent_pid = getpid();
 #ifdef PROC
-      // TODO: STUDENT TASK
-      int pid = fork();
-      if (pid == 0) {
-         int r = prctl(PR_SET_PDEATHSIG, SIGTERM);
+      // PART2 TASK: Implement forking
 
-         dispatch(client_socket_number);
 
-         // This is to kill the child process if parent proc dies.
-         // ONLY works on LINUX
-         // COMMENT IT OUT if you are NOT on LINUX
-         if (r == -1 || getppid() != parent_pid) {
-            perror(0);
-            exit(1);
-         }
-      }
 #else
       dispatch(client_socket_number);
 #endif

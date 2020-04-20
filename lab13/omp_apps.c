@@ -138,9 +138,8 @@ char *image_proc(const char* filename) {
    bmp_img_init_df(&img_copy, wid, hgt);
 
    // Ignore boundary pixels for simplicity
-   // TODO: Student task. should be easy
    // scheduling policy is an interesting config option: http://jakascorner.com/blog/2016/06/omp-for-scheduling.html
-#pragma omp parallel for collapse(2) schedule(dynamic, 16)
+   #pragma omp parallel for collapse(2) schedule(dynamic, 16)
    for (int i = 1; i < hgt-1; i++) {
       for (int j = 1; j < wid-1; j++) {
          sobel_filter(img.img_pixels, img_copy.img_pixels, i, j);
