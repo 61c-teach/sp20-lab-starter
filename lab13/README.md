@@ -172,7 +172,8 @@ To do that, you'd need to connect to a hive machine using -L option. For example
 Now, SSH will bind to port 4000 on your computer. Any traffic that comes to this port is sent to the SSH server, and the ssh server will send the traffic
 to port 8000 of 127.0.0.1 of the hive machine. Request `localhost:4000` in your browser would allow you to get the same affect as navigating to `localhost:8000` in the browser on a hive machine. 
 And, of course, you can use `curl` instead. (`man curl` for more usage of `curl`). 
-- The bmp library we use here is very basic. It lacks many relatively complicated padding features necessary to work with images of any sizes. The filter algorithm will only work nicely on bmp images that have dimensions of powers of 2. Don't be too surprised at seeing funky results if you try other image sources.
+- The bmp library we use here is very basic. It lacks many relatively complicated padding features necessary to work with images of any sizes. 
+In fact, the filter algorithm will only work nicely on bmp images that have dimensions of powers of 2. Don't be too surprised at seeing funky results if you try other image sources.
 
 Optional: 
 * The sobel edge detector is implemented for you. Can you optimize it using OpenMP? </br>
